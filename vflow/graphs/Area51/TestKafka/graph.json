@@ -17,7 +17,7 @@
                     "groupId": "test_group",
                     "offset": "oldest",
                     "maxWaitTime": 500,
-                    "autoCommit": false
+                    "autoCommit": fals
                 }
             }
         },
