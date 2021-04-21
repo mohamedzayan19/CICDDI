@@ -1,0 +1,351 @@
+{
+    "properties": {},
+    "description": "",
+    "processes": {
+        "kafkaconsumer1": {
+            "component": "com.sap.kafka.consumer2",
+            "metadata": {
+                "label": "Kafka Consumer",
+                "x": 780.999997138977,
+                "y": 100.99999952316284,
+                "height": 80,
+                "width": 120,
+                "config": {
+                    "topics": "TutorialTopic,productionNotification",
+                    "connectionType": "manual",
+                    "brokers": "ec2-3-239-84-119.compute-1.amazonaws.com:9092",
+                    "groupId": "test_group",
+                    "offset": "oldest",
+                    "maxWaitTime": 500,
+                    "autoCommit": false
+                }
+            }
+        },
+        "wiretap1": {
+            "component": "com.sap.util.wiretap",
+            "metadata": {
+                "label": "Wiretap",
+                "x": 965.9999961853027,
+                "y": 40.99999952316284,
+                "height": 80,
+                "width": 120,
+                "ui": "dynpath",
+                "config": {}
+            }
+        },
+        "saphanaclient1": {
+            "component": "com.sap.hana.client2",
+            "metadata": {
+                "label": "SAP HANA Client",
+                "x": 257.99999809265137,
+                "y": 40.99999952316284,
+                "height": 80,
+                "width": 120,
+                "config": {
+                    "connection": {
+                        "configurationType": "Configuration Manager",
+                        "connectionID": "HANAS4"
+                    },
+                    "tableName": "\"ZAYAN\".\"PRODUCTIONNOTIFICATIONTEST\"",
+                    "inputFormat": "JSON",
+                    "initTable": "Create",
+                    "tableColumns": [
+                        {
+                            "name": "\"CREATIONTIMESTAMP\"",
+                            "type": "TIMESTAMP"
+                        },
+                        {
+                            "name": "\"IDENTID\"",
+                            "type": "VARCHAR",
+                            "size": 255
+                        },
+                        {
+                            "name": "\"IDENTTYPE\"",
+                            "type": "VARCHAR",
+                            "size": 255
+                        },
+                        {
+                            "name": "\"STATUS\"",
+                            "type": "VARCHAR",
+                            "size": 255
+                        },
+                        {
+                            "name": "\"CHECKPOINT\"",
+                            "type": "VARCHAR",
+                            "size": 255
+                        },
+                        {
+                            "name": "\"CHECKPOINTTIMESTAMP\"",
+                            "type": "TIMESTAMP"
+                        },
+                        {
+                            "name": "\"STATUS5300TIMESTAMP\"",
+                            "type": "TIMESTAMP"
+                        },
+                        {
+                            "name": "\"PRODAREASTGPL\"",
+                            "type": "VARCHAR",
+                            "size": 255
+                        },
+                        {
+                            "name": "\"TYPEPPECOMP\"",
+                            "type": "VARCHAR",
+                            "size": 255
+                        },
+                        {
+                            "name": "\"CODINGTYPE\"",
+                            "type": "VARCHAR",
+                            "size": 255
+                        },
+                        {
+                            "name": "\"PPECOMPONENTAI\"",
+                            "type": "VARCHAR",
+                            "size": 255
+                        },
+                        {
+                            "name": "\"PPECOMPONENTVARIANT\"",
+                            "type": "VARCHAR",
+                            "size": 255
+                        },
+                        {
+                            "name": "\"COUNTER\"",
+                            "type": "INTEGER"
+                        }
+                    ],
+                    "insertMode": "UPSERT"
+                }
+            }
+        },
+        "python3operator1": {
+            "component": "com.sap.system.python3Operator",
+            "metadata": {
+                "label": "Python3 Operator",
+                "x": 1150.9999952316284,
+                "y": 100.49999952316284,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "config": {
+                    "script": "import json\nimport time\n\nterminate = False\n\ndef on_input(data):\n    #time.sleep(5)\n    if(terminate == True):\n        api.logger.fatal()\n    json_body = json.loads(data.body)\n    body = json_body[\"productionNotification\"]\n    api.send(\"output\", api.Message(body=body,attributes=data.attributes))\napi.set_port_callback(\"input\", on_input)\n\ndef on_terminate(signal):\n    global terminate\n    terminate = True\napi.set_port_callback(\"terminate\", on_terminate)"
+                },
+                "additionalinports": [
+                    {
+                        "name": "input",
+                        "type": "message"
+                    },
+                    {
+                        "name": "terminate",
+                        "type": "message"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "output",
+                        "type": "message"
+                    }
+                ]
+            }
+        },
+        "wiretap2": {
+            "component": "com.sap.util.wiretap",
+            "metadata": {
+                "label": "Wiretap",
+                "x": 72.99999904632568,
+                "y": 100.49999952316284,
+                "height": 80,
+                "width": 120,
+                "ui": "dynpath",
+                "config": {}
+            }
+        },
+        "terminal1": {
+            "component": "com.sap.util.terminal",
+            "metadata": {
+                "label": "Terminal",
+                "x": 965.9999961853027,
+                "y": 160.99999952316284,
+                "height": 80,
+                "width": 120,
+                "ui": "dynpath",
+                "config": {}
+            }
+        },
+        "wiretap3": {
+            "component": "com.sap.util.wiretap",
+            "metadata": {
+                "label": "Wiretap",
+                "x": 611.999997138977,
+                "y": 100.99999952316284,
+                "height": 80,
+                "width": 120,
+                "ui": "dynpath",
+                "config": {}
+            }
+        },
+        "python3operator11": {
+            "component": "com.sap.system.python3Operator",
+            "metadata": {
+                "label": "Python3 Operator",
+                "x": 442.99999713897705,
+                "y": 100.99999952316284,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "config": {
+                    "script": "terminate = False\ndef on_input(data):\n    if(terminate == True):\n        api.logger.fatal()\n    api.send(\"output\", data)\napi.set_port_callback(\"input\", on_input)\n\ndef on_terminate(signal):\n    global terminate\n    terminate = True\napi.set_port_callback(\"terminate\", on_terminate)"
+                },
+                "additionalinports": [
+                    {
+                        "name": "input",
+                        "type": "message"
+                    },
+                    {
+                        "name": "terminate",
+                        "type": "message"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "output",
+                        "type": "message"
+                    }
+                ]
+            },
+            "name": "python3operator1"
+        },
+        "terminal2": {
+            "component": "com.sap.util.terminal",
+            "metadata": {
+                "label": "Terminal",
+                "x": 257.99999809265137,
+                "y": 160.99999952316284,
+                "height": 80,
+                "width": 120,
+                "ui": "dynpath",
+                "config": {}
+            }
+        }
+    },
+    "groups": [],
+    "connections": [
+        {
+            "metadata": {
+                "points": "904.999997138977,131.99999952316284 932.9999966621399,131.99999952316284 932.9999966621399,80.99999952316284 960.9999961853027,80.99999952316284"
+            },
+            "src": {
+                "port": "message",
+                "process": "kafkaconsumer1"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "wiretap1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1089.9999961853027,80.99999952316284 1117.9999957084656,80.99999952316284 1117.9999957084656,131.49999952316284 1145.9999952316284,131.49999952316284"
+            },
+            "src": {
+                "port": "out",
+                "process": "wiretap1"
+            },
+            "tgt": {
+                "port": "input",
+                "process": "python3operator1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1274.9999952316284,140.49999952316284 1302.9999947547913,140.49999952316284 1302.9999947547913,72.5 1117.9999957084656,72.5 1117.9999957084656,12 932.9999966621399,12 932.9999966621399,72 409.9999976158142,72 409.9999976158142,12 224.99999856948853,12 224.99999856948853,72.5 12,72.5 12,140.49999952316284 67.99999904632568,140.49999952316284"
+            },
+            "src": {
+                "port": "output",
+                "process": "python3operator1"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "wiretap2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "196.99999904632568,140.49999952316284 224.99999856948853,140.49999952316284 224.99999856948853,89.99999952316284 252.99999809265137,89.99999952316284"
+            },
+            "src": {
+                "port": "out",
+                "process": "wiretap2"
+            },
+            "tgt": {
+                "port": "data",
+                "process": "saphanaclient1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1089.9999961853027,200.99999952316284 1117.9999957084656,200.99999952316284 1117.9999957084656,149.49999952316284 1145.9999952316284,149.49999952316284"
+            },
+            "src": {
+                "port": "out1",
+                "process": "terminal1"
+            },
+            "tgt": {
+                "port": "terminate",
+                "process": "python3operator1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "735.999997138977,140.99999952316284 775.999997138977,140.99999952316284"
+            },
+            "src": {
+                "port": "out",
+                "process": "wiretap3"
+            },
+            "tgt": {
+                "port": "markoffsets",
+                "process": "kafkaconsumer1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "566.999997138977,140.99999952316284 606.999997138977,140.99999952316284"
+            },
+            "src": {
+                "port": "output",
+                "process": "python3operator11"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "wiretap3"
+            }
+        },
+        {
+            "metadata": {
+                "points": "381.99999809265137,80.99999952316284 409.9999976158142,80.99999952316284 409.9999976158142,131.99999952316284 437.99999713897705,131.99999952316284"
+            },
+            "src": {
+                "port": "result",
+                "process": "saphanaclient1"
+            },
+            "tgt": {
+                "port": "input",
+                "process": "python3operator11"
+            }
+        },
+        {
+            "metadata": {
+                "points": "381.99999809265137,200.99999952316284 409.9999976158142,200.99999952316284 409.9999976158142,149.99999952316284 437.99999713897705,149.99999952316284"
+            },
+            "src": {
+                "port": "out1",
+                "process": "terminal2"
+            },
+            "tgt": {
+                "port": "terminate",
+                "process": "python3operator11"
+            }
+        }
+    ],
+    "inports": {},
+    "outports": {}
+}
