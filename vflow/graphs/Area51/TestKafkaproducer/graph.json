@@ -1,0 +1,143 @@
+{
+    "properties": {},
+    "description": "",
+    "processes": {
+        "wiretap1": {
+            "component": "com.sap.util.wiretap",
+            "metadata": {
+                "label": "Wiretap",
+                "x": 350,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "ui": "dynpath",
+                "config": {}
+            }
+        },
+        "python3operator1": {
+            "component": "com.sap.system.python3Operator",
+            "metadata": {
+                "label": "Python3 Operator",
+                "x": 181,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "config": {
+                    "script": "import pandas as pd\nproductionOrder={\"productionOrder\": [{\"componentId\": None, \"componentOrderId\": \"M70000178304\", \"orderId\": None, \"assemblyLine\": \"MP71\", \"productionStatus\": \"5500\", \n\"identId\": \"T588369670220B20641000762515271\", \"ident_Type\": \"SR\", \"engineId\": None, \"materialNumber\": \"8836967-02\", \"series\": \"G20PH25L____\", \n\"engineCode\": \"OBSOLET\", \"specialEngine\": None, \"componentSpecification\": None, \"gearbox\": None}]}\n\nproductionNotification={\"productionNotification\": [{\"creationTimestamp\": \"2020-07-27 11:30:35\", \"identType\": \"SR\",\n\"identId\": \"T588369670220B20641000762515271\", \"status\": \"5500\", \"checkpoint\": \"5500\", \"checkpointTimestamp\": \"2020-07-27 11:30:35\", \"prodAreaStgPl\": \"2.2\",\n    \"typePpeComp\":\"\", \"codingType\":\"\", \"ppeComponentAi\":\"\",\n    \"ppeComponentVariant\":\"\",\n    \"status5300Timestamp\":\"2020-07-27 11:30:35\"}]}\n    \ndef on_input(data):\n    \n    body = productionNotification\n    body[\"productionNotification\"][0][\"counter\"]=int(data)\n    api.send(\"output\", api.Message(body))\n    \napi.set_port_callback(\"input\",on_input)\n\n\n\n\n"
+                },
+                "additionalinports": [
+                    {
+                        "name": "input",
+                        "type": "string"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "output",
+                        "type": "message"
+                    }
+                ]
+            }
+        },
+        "kafkaproducer1": {
+            "component": "com.sap.kafka.producer",
+            "metadata": {
+                "label": "Kafka Producer",
+                "x": 519,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "config": {
+                    "brokers": "ec2-3-239-84-119.compute-1.amazonaws.com:9092",
+                    "topic": "productionNotification",
+                    "kafkaVersion": "1.0.0",
+                    "manualPartitioning": false
+                }
+            }
+        },
+        "wiretap2": {
+            "component": "com.sap.util.wiretap",
+            "metadata": {
+                "label": "Wiretap",
+                "x": 688,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "ui": "dynpath",
+                "config": {}
+            }
+        },
+        "datagenerator1": {
+            "component": "com.sap.util.dataGenerator",
+            "metadata": {
+                "label": "Data Generator",
+                "x": 12,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "config": {
+                    "script": "// This operator is needed to keep compatibility to the old datagenerator\nvar counter = 0;\n\n$.addTimer(\"4000ms\",doTick);\n\nfunction doTick(ctx) {\n    $.output(counter);\n    counter++;\n}\n"
+                }
+            }
+        }
+    },
+    "groups": [],
+    "connections": [
+        {
+            "metadata": {
+                "points": "305,52 345,52"
+            },
+            "src": {
+                "port": "output",
+                "process": "python3operator1"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "wiretap1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "474,52 514,52"
+            },
+            "src": {
+                "port": "out",
+                "process": "wiretap1"
+            },
+            "tgt": {
+                "port": "message",
+                "process": "kafkaproducer1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "643,52 683,52"
+            },
+            "src": {
+                "port": "markoffsets",
+                "process": "kafkaproducer1"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "wiretap2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "136,52 176,52"
+            },
+            "src": {
+                "port": "output",
+                "process": "datagenerator1"
+            },
+            "tgt": {
+                "port": "input",
+                "process": "python3operator1"
+            }
+        }
+    ],
+    "inports": {},
+    "outports": {}
+}
